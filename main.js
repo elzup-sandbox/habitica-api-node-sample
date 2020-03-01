@@ -1,5 +1,6 @@
 'use strict'
 const axios = require('axios').default
+const { format } = require('fecha')
 const { HABITICA_USER_ID, HABITICA_TOKEN } = process.env
 
 const client = axios.create({
@@ -21,30 +22,21 @@ const main = async () => {
   const tasks = res.data.data
   const workout = tasks.find(v => /筋トレ/.exec(v.text))
 
-  const getTimes = date => {
-    const t = new Date(date)
-    const y = t.getFullYear()
-    const m = String(t.getMonth() + 1).padStart(2, '0')
-    const d = String(t.getDate()).padStart(2, '0')
-    return [`${y}-${m}-${d}`, t]
-  }
-
+  // const times = workout.history.map(commit => format(commit.date, 'YYYY-MM-DD'))
   // 後日 commit のタイムスタンプ
-  // console.log(times.map(v => v[0]).join('\n'))
+  // console.log(times.join('\n'))
 
-  const times = workout.history.map(commit => commit.date).map(getTimes)
+  const times = workout.history.map(commit => [
+    format(commit.date, 'YYYY-MM-DD'),
+    commit.date,
+  ])
   times.reverse()
 
   let prev = ''
-  const strs = times.map((v, i) => {
-    if (v[0] === prev) {
-      // 一致する場合は前日に
-      const time = getTimes(new Date(v[1] - 24 * 60 * 60 * 1000))
-      prev = time[0]
-      return time[0]
-    }
-    prev = v[0]
-    return v[0]
+  const strs = times.map(([s, t], i) => {
+    // 一致する場合は前日に
+    const ts = s === prev ? format(t - 24 * 60 * 60 * 1000, 'YYYY-MM-DD') : s
+    return (prev = ts)
   })
 
   strs.reverse()
