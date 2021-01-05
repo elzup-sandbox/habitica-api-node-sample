@@ -3,7 +3,7 @@
     "run": ""
   },
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "axios-cookiejar-support": "^0.5.1",
     "fecha": "^4.1.0"
   }
